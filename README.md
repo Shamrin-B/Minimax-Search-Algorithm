@@ -1,6 +1,6 @@
 <h1>ExpNo 5 : Implement Minimax Search Algorithm for a Simple TIC-TAC-TOE game</h1> 
-<h3>Name:           </h3>
-<h3>Register Number/Staff Id:          </h3>
+<h3>Name:  Shamrin B        </h3>
+<h3>Register number:21224040306          </h3>
 <H3>Aim:</H3>
 <p>
     Implement Minimax Search Algorithm for a Simple TIC-TAC-TOE game
@@ -104,12 +104,271 @@ end
 
 <hr>
 <h2>Sample Input and Output</h2>
+```
+Program:
+```
 
-![image](https://github.com/natsaravanan/19AI405FUNDAMENTALSOFARTIFICIALINTELLIGENCE/assets/87870499/6b668685-8bcc-43c5-b5c2-ddd43f3da84a)
-![image](https://github.com/natsaravanan/19AI405FUNDAMENTALSOFARTIFICIALINTELLIGENCE/assets/87870499/8ca1b08a-8312-4ef5-89df-e69b7b2c3fa2)
-![image](https://github.com/natsaravanan/19AI405FUNDAMENTALSOFARTIFICIALINTELLIGENCE/assets/87870499/dc06427a-d4ce-43a1-95bd-9acfaefac323)
-![image](https://github.com/natsaravanan/19AI405FUNDAMENTALSOFARTIFICIALINTELLIGENCE/assets/87870499/a8a27e2a-6fd4-46a2-afb5-6d27b8556702)
-![image](https://github.com/natsaravanan/19AI405FUNDAMENTALSOFARTIFICIALINTELLIGENCE/assets/87870499/a2acb6a1-ed8e-42e5-8968-fe805e4b0255)
+
+    import time
+    class Game:
+    def __init__(self):
+        self.initialize_game()
+
+    def initialize_game(self):
+        self.current_state = [
+            ['.', '.', '.'],
+            ['.', '.', '.'],
+            ['.', '.', '.']
+        ]
+        self.player_turn = 'X'
+
+    def draw_board(self):
+        for i in range(3):
+            for j in range(3):
+                print('{}|'.format(self.current_state[i][j]), end=" ")
+            print()
+        print()
+
+    def is_valid(self, px, py):
+        if px < 0 or px > 2 or py < 0 or py > 2:
+            return False
+        elif self.current_state[px][py] != '.':
+            return False
+        else:
+            return True
+
+    def is_end(self):
+        # Check columns
+        for i in range(3):
+            if (self.current_state[0][i] != '.' and
+                    self.current_state[0][i] == self.current_state[1][i] and
+                    self.current_state[1][i] == self.current_state[2][i]):
+                return self.current_state[0][i]
+
+        # Check rows
+        for i in range(3):
+            if self.current_state[i] == ['X', 'X', 'X']:
+                return 'X'
+            elif self.current_state[i] == ['O', 'O', 'O']:
+                return 'O'
+
+        # Check main diagonal
+        if (self.current_state[0][0] != '.' and
+                self.current_state[0][0] == self.current_state[1][1] and
+                self.current_state[0][0] == self.current_state[2][2]):
+            return self.current_state[0][0]
+
+        # Check other diagonal
+        if (self.current_state[0][2] != '.' and
+                self.current_state[0][2] == self.current_state[1][1] and
+                self.current_state[0][2] == self.current_state[2][0]):
+            return self.current_state[0][2]
+
+        # Check for empty cells
+        for i in range(3):
+            for j in range(3):
+                if self.current_state[i][j] == '.':
+                    return None
+
+        return '.'
+
+    def max_alpha_beta(self, alpha, beta):
+        maxv = -2
+        px = None
+        py = None
+
+        result = self.is_end()
+
+        if result == 'X':
+            return (-1, 0, 0)
+        elif result == 'O':
+            return (1, 0, 0)
+        elif result == '.':
+            return (0, 0, 0)
+
+        for i in range(3):
+            for j in range(3):
+                if self.current_state[i][j] == '.':
+                    self.current_state[i][j] = 'O'
+
+                    m, min_i, min_j = self.min_alpha_beta(alpha, beta)
+
+                    if m > maxv:
+                        maxv = m
+                        px = i
+                        py = j
+
+                    self.current_state[i][j] = '.'
+
+                    if maxv >= beta:
+                        return (maxv, px, py)
+
+                    if maxv > alpha:
+                        alpha = maxv
+
+        return (maxv, px, py)
+
+    def min_alpha_beta(self, alpha, beta):
+        minv = 2
+        qx = None
+        qy = None
+
+        result = self.is_end()
+
+        if result == 'X':
+            return (-1, 0, 0)
+        elif result == 'O':
+            return (1, 0, 0)
+        elif result == '.':
+            return (0, 0, 0)
+
+        for i in range(3):
+            for j in range(3):
+                if self.current_state[i][j] == '.':
+                    self.current_state[i][j] = 'X'
+
+                    m, max_i, max_j = self.max_alpha_beta(alpha, beta)
+
+                    if m < minv:
+                        minv = m
+                        qx = i
+                        qy = j
+
+                    self.current_state[i][j] = '.'
+
+                    if minv <= alpha:
+                        return (minv, qx, qy)
+
+                    if minv < beta:
+                        beta = minv
+
+        return (minv, qx, qy)
+
+    def play_alpha_beta(self):
+        while True:
+            self.draw_board()
+
+            self.result = self.is_end()
+
+            if self.result is not None:
+                if self.result == 'X':
+                    print('The winner is X!')
+                elif self.result == 'O':
+                    print('The winner is O!')
+                elif self.result == '.':
+                    print("It's a tie!")
+
+                return
+
+            if self.player_turn == 'X':
+                while True:
+                    start = time.time()
+
+                    m, qx, qy = self.min_alpha_beta(-2, 2)
+
+                    end = time.time()
+
+                    print(
+                        'Evaluation time: {}s'.format(
+                            round(end - start, 7)
+                        )
+                    )
+
+                    print(
+                        'Recommended move: X = {}, Y = {}'.format(
+                            qx, qy
+                        )
+                    )
+
+                    px = int(input('Insert the X coordinate: '))
+                    py = int(input('Insert the Y coordinate: '))
+
+                    if self.is_valid(px, py):
+                        self.current_state[px][py] = 'X'
+                        self.player_turn = 'O'
+                        break
+                    else:
+                        print('The move is not valid! Try again.')
+
+            else:
+                m, px, py = self.max_alpha_beta(-2, 2)
+
+                self.current_state[px][py] = 'O'
+                self.player_turn = 'X'
+
+
+    def main():
+    g = Game()
+    g.play_alpha_beta()
+
+
+    if __name__ == "__main__":
+    main()
+
+```
+ PS C:\Users\B.Mohamed javid\Desktop\Fund of AI> python exp6.py
+ .| .| .| 
+ .| .| .| 
+ .| .| .| 
+Evaluation time: 0.0564904s
+Recommended move: X = 0, Y = 0
+Insert the X coordinate: 1
+Insert the Y coordinate: 1
+.| .| .| 
+.| X| .| 
+.| .| .| 
+
+O| .| .| 
+.| X| .| 
+.| .| .| 
+
+Evaluation time: 0.0057561s
+Recommended move: X = 0, Y = 1
+Insert the X coordinate: 0 
+Insert the Y coordinate: 2
+O| .| X| 
+.| X| .| 
+.| .| .| 
+
+O| .| X| 
+.| X| .| 
+O| .| .| 
+
+Evaluation time: 0.0003307s
+Recommended move: X = 1, Y = 0
+Insert the X coordinate: 1
+Insert the Y coordinate: 0
+
+O| .| X| 
+X| X| .| 
+O| .| .| 
+
+O| .| X| 
+X| X| O| 
+O| .| .| 
+
+Evaluation time: 3.93e-05s
+Recommended move: X = 0, Y = 1
+Insert the X coordinate: 0
+Insert the Y coordinate: 1
+O| X| X| 
+X| X| O| 
+O| .| .| 
+
+O| X| X| 
+X| X| O| 
+O| O| .| 
+
+Evaluation time: 9.8e-06s
+Recommended move: X = 2, Y = 2
+Insert the X coordinate: 2
+Insert the Y coordinate: 2
+O| X| X| 
+X| X| O| 
+O| O| X| 
+
+It's a tie!
+```
 
 <hr>
 <h2>Result:</h2>
