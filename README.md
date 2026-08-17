@@ -1,6 +1,7 @@
 <h1>ExpNo 5 : Implement Minimax Search Algorithm for a Simple TIC-TAC-TOE game</h1> 
 <h3>Name:  Shamrin B        </h3>
-<h3>Register number:21224040306          </h3>
+<h3>Register number:21224040306       
+DATE: 17.08.2026</h3>
 <H3>Aim:</H3>
 <p>
     Implement Minimax Search Algorithm for a Simple TIC-TAC-TOE game
