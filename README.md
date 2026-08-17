@@ -109,19 +109,26 @@ Program:
 ```
 
 
-    import time
-    class Game:
+  import time
+
+
+class Game:
+
     def __init__(self):
         self.initialize_game()
 
+    # Initialize the game
     def initialize_game(self):
         self.current_state = [
             ['.', '.', '.'],
             ['.', '.', '.'],
             ['.', '.', '.']
         ]
+
+        # Player X always plays first
         self.player_turn = 'X'
 
+    # Display the board
     def draw_board(self):
         for i in range(3):
             for j in range(3):
@@ -129,26 +136,34 @@ Program:
             print()
         print()
 
+    # Check whether the given position is valid
     def is_valid(self, px, py):
         if px < 0 or px > 2 or py < 0 or py > 2:
             return False
+
         elif self.current_state[px][py] != '.':
             return False
+
         else:
             return True
 
+    # Check whether the game has ended
     def is_end(self):
-        # Check columns
+
+        # Check vertical win
         for i in range(3):
             if (self.current_state[0][i] != '.' and
                     self.current_state[0][i] == self.current_state[1][i] and
                     self.current_state[1][i] == self.current_state[2][i]):
+
                 return self.current_state[0][i]
 
-        # Check rows
+        # Check horizontal win
         for i in range(3):
+
             if self.current_state[i] == ['X', 'X', 'X']:
                 return 'X'
+
             elif self.current_state[i] == ['O', 'O', 'O']:
                 return 'O'
 
@@ -156,115 +171,154 @@ Program:
         if (self.current_state[0][0] != '.' and
                 self.current_state[0][0] == self.current_state[1][1] and
                 self.current_state[0][0] == self.current_state[2][2]):
+
             return self.current_state[0][0]
 
-        # Check other diagonal
+        # Check second diagonal
         if (self.current_state[0][2] != '.' and
                 self.current_state[0][2] == self.current_state[1][1] and
                 self.current_state[0][2] == self.current_state[2][0]):
+
             return self.current_state[0][2]
 
-        # Check for empty cells
+        # Check whether board is full
         for i in range(3):
             for j in range(3):
+
                 if self.current_state[i][j] == '.':
                     return None
 
+        # Board is full and nobody wins
         return '.'
 
-    def max_alpha_beta(self, alpha, beta):
+    # MAX function
+    # O is the maximizing player
+    def max(self):
+
+        # -1 = X wins
+        #  0 = Tie
+        #  1 = O wins
+
         maxv = -2
         px = None
         py = None
 
         result = self.is_end()
 
+        # If game has ended
         if result == 'X':
             return (-1, 0, 0)
+
         elif result == 'O':
             return (1, 0, 0)
+
         elif result == '.':
             return (0, 0, 0)
 
+        # Try every possible move
         for i in range(3):
             for j in range(3):
+
                 if self.current_state[i][j] == '.':
+
+                    # O makes temporary move
                     self.current_state[i][j] = 'O'
 
-                    m, min_i, min_j = self.min_alpha_beta(alpha, beta)
+                    # Call MIN to simulate X's response
+                    m, min_i, min_j = self.min()
 
+                    # O wants maximum value
                     if m > maxv:
                         maxv = m
                         px = i
                         py = j
 
+                    # Undo move
                     self.current_state[i][j] = '.'
-
-                    if maxv >= beta:
-                        return (maxv, px, py)
-
-                    if maxv > alpha:
-                        alpha = maxv
 
         return (maxv, px, py)
 
-    def min_alpha_beta(self, alpha, beta):
+    # MIN function
+    # X is the minimizing player
+    def min(self):
+
+        # -1 = X wins
+        #  0 = Tie
+        #  1 = O wins
+
         minv = 2
         qx = None
         qy = None
 
         result = self.is_end()
 
+        # If game has ended
         if result == 'X':
             return (-1, 0, 0)
+
         elif result == 'O':
             return (1, 0, 0)
+
         elif result == '.':
             return (0, 0, 0)
 
+        # Try every possible move
         for i in range(3):
             for j in range(3):
+
                 if self.current_state[i][j] == '.':
+
+                    # X makes temporary move
                     self.current_state[i][j] = 'X'
 
-                    m, max_i, max_j = self.max_alpha_beta(alpha, beta)
+                    # Call MAX to simulate O's response
+                    m, max_i, max_j = self.max()
 
+                    # X wants minimum value
                     if m < minv:
                         minv = m
                         qx = i
                         qy = j
 
+                    # Undo move
                     self.current_state[i][j] = '.'
-
-                    if minv <= alpha:
-                        return (minv, qx, qy)
-
-                    if minv < beta:
-                        beta = minv
 
         return (minv, qx, qy)
 
-    def play_alpha_beta(self):
+    # Main game function
+    def play(self):
+
         while True:
+
+            # Display board
             self.draw_board()
 
+            # Check game status
             self.result = self.is_end()
 
+            # If game has ended
             if self.result is not None:
+
                 if self.result == 'X':
                     print('The winner is X!')
+
                 elif self.result == 'O':
                     print('The winner is O!')
+
                 elif self.result == '.':
                     print("It's a tie!")
 
                 return
 
+            # Human player's turn
             if self.player_turn == 'X':
+
                 while True:
+
+                    # Calculate recommended move using MINIMAX
                     start = time.time()
 
-                    m, qx, qy = self.min_alpha_beta(-2, 2)
+                    m, qx, qy = self.min()
 
                     end = time.time()
 
@@ -280,32 +334,73 @@ Program:
                         )
                     )
 
-                    px = int(input('Insert the X coordinate: '))
-                    py = int(input('Insert the Y coordinate: '))
+                    # Get human player's move
+                    try:
+                        px = int(input('Insert the X coordinate: '))
+                        py = int(input('Insert the Y coordinate: '))
 
+                    except ValueError:
+                        print('Please enter numbers between 0 and 2.')
+                        continue
+
+                    # Check whether move is valid
                     if self.is_valid(px, py):
+
+                        # Place X
                         self.current_state[px][py] = 'X'
+
+                        # Change turn to O
                         self.player_turn = 'O'
+
                         break
+
                     else:
                         print('The move is not valid! Try again.')
 
+            # AI player's turn
             else:
-                m, px, py = self.max_alpha_beta(-2, 2)
 
+                print("AI (O) is thinking...")
+
+                start = time.time()
+
+                # MAX chooses best move for O
+                m, px, py = self.max()
+
+                end = time.time()
+
+                print(
+                    'AI evaluation time: {}s'.format(
+                        round(end - start, 7)
+                    )
+                )
+
+                print(
+                    'AI chooses: X = {}, Y = {}'.format(
+                        px, py
+                    )
+                )
+
+                # Place O
                 self.current_state[px][py] = 'O'
+
+                # Change turn to X
                 self.player_turn = 'X'
 
 
+     # Main function
     def main():
+
     g = Game()
-    g.play_alpha_beta()
+    g.play()
 
 
+    # Start the program
     if __name__ == "__main__":
     main()
-
 ```
+OUTPUT:
+
  PS C:\Users\B.Mohamed javid\Desktop\Fund of AI> python exp6.py
  .| .| .| 
  .| .| .| 
